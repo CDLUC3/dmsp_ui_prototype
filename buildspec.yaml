@@ -1,0 +1,47 @@
+# Build specifications for AWS CodeBuild
+#   See: https://docs.aws.amazon.com/codebuild/latest/userguide/build-spec-ref.html
+
+# Each input artifact is extracted to its own directory by CodePipeline, the locations of which
+# are stored in environment variables. The directory for the primary source artifact (this repo)
+# is made available with $CODEBUILD_SRC_DIR. The directory for the DMPTool push artifacts is
+# made available with $CODEBUILD_SRC_DIR_dmptool-commit.
+
+version: 0.2
+
+phases:
+  install:
+    # Install any appropriate build dependencies here (e.g. node)
+
+  pre_build:
+    commands:
+      # Do any environment setup necessary to perform a build (e.g. `- npm install`)
+      - echo Doing some pre-build stuff ...
+
+      # The build environment has been made available as '$BUILD_ENV' (e.g. 'dev')
+  build:
+    commands:
+      - echo Running tests ...
+      # For example: `- npm run test`
+
+      - echo Building the application ...
+      # TODO replace the below line with the real build (e.g. `- npm run build`)
+      - mkdir ./build && cp index.html ./build
+
+  post_build:
+    commands:
+      # TODO: Replace the `ui` subdir so that we deploy to the root once the DMP ID
+      #       landing pages have been incorporated into the new UI.
+      # copy the contents of /build to S3
+      - aws s3 sync ./build s3://${S3_BUCKET}/ui
+      # invalidate the CloudFront cache for index.html and service-worker.js
+      # to force CloudFront to update its edge locations with the new versions
+      - >
+        aws cloudfront create-invalidation
+        --distribution-id #{CLOUDFRONT_DISTRO}
+        --paths /ui/*
+        --region #{GLOBAL_REGION}
+
+artifacts:
+  files:
+    - '**/*'
+  base-directory: build
