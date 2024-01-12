@@ -37,9 +37,9 @@ phases:
       # to force CloudFront to update its edge locations with the new versions
       - >
         aws cloudfront create-invalidation
-        --distribution-id #{CLOUDFRONT_DISTRO}
+        --distribution-id ${CLOUDFRONT_DISTRO}
         --paths /ui/*
-        --region #{GLOBAL_REGION}
+        --region ${GLOBAL_REGION}
 
 artifacts:
   files:
