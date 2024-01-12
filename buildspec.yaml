@@ -9,7 +9,7 @@
 version: 0.2
 
 phases:
-  install:
+  # install:
     # Install any appropriate build dependencies here (e.g. node)
 
   pre_build:
